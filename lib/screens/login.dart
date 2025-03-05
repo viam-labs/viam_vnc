@@ -19,6 +19,7 @@ class _LoginState extends State<LoginScreen> {
   String loadingText = "";
   late String viamCLI;
   String loginText = "";
+  String errorText = "";
   bool _isLoggingIn = false;
 
   @override
@@ -31,11 +32,25 @@ class _LoginState extends State<LoginScreen> {
     setState(() {
       loadingText = "Preparing Viam tools...";
     });
-    viamCLI = await getCLI();
+    try {
+      viamCLI = await getCLI();
+    } catch (err) {
+      setState(() {
+        loadingText = "";
+        errorText = err.toString();
+      });
+    }
     setState(() {
       loadingText = "Setting up VNC viewer...";
     });
-    await setupVNC();
+    try {
+      await setupVNC();
+    } catch (err) {
+      setState(() {
+        loadingText = "";
+        errorText = err.toString();
+      });
+    }
 
     setState(() {
       loadingText = "Checking if logged in...";
@@ -58,6 +73,11 @@ class _LoginState extends State<LoginScreen> {
     process.stdout.transform(utf8.decoder).listen((event) {
       setState(() {
         loginText += event;
+      });
+    });
+    process.stderr.transform(utf8.decoder).listen((event) {
+      setState(() {
+        errorText += event;
       });
     });
     if (await process.exitCode == 0) {
@@ -87,6 +107,12 @@ class _LoginState extends State<LoginScreen> {
                   ? [CircularProgressIndicator.adaptive(), Text(loadingText)]
                   : [
                     Text(loginText.replaceAll("Info: ", "")),
+                    Text(
+                      errorText,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
                     TextButton(
                       onPressed: _isLoggingIn ? null : onPressed,
                       child: Text("Login"),
