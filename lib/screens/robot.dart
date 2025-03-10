@@ -38,6 +38,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
   _State _state = _State.init;
 
   bool _useExternalVNC = true;
+  bool _lowBandwidth = false;
   bool _debugMode = false;
 
   final List<_Log> logs = [];
@@ -237,13 +238,25 @@ class _RobotState extends State<RobotScreen> with WindowListener {
       if (vncExe == null) {
         return errLog("Could not load external Windows VNC viewer executable");
       }
-      vncProc = await Process.start(vncExe, [
+      List<String> vncArgs = [
         "-connect",
         "127.0.0.1:5901",
         "-password",
         _vncPassword,
         "-autoscaling",
-      ]);
+      ];
+      if (_lowBandwidth) {
+        vncArgs.addAll([
+          "-64colors",
+          "-encoding",
+          "tight",
+          "-compresslevel",
+          "9",
+          "-quality",
+          "6",
+        ]);
+      }
+      vncProc = await Process.start(vncExe, vncArgs);
       vncProc!.stdout.transform(utf8.decoder).forEach((log) {
         stdLog(log);
         _logsController.animateTo(
@@ -431,6 +444,28 @@ class _RobotState extends State<RobotScreen> with WindowListener {
                   ),
                 ],
               ),
+              if (Platform.isWindows)
+                TableRow(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Low-Bandwidth Settings"),
+                        Text(
+                          "This option will improve responsiveness at the cost of quality and resolution.",
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                    Switch.adaptive(
+                      value: _lowBandwidth,
+                      onChanged:
+                          (isOn) => setState(() {
+                            _lowBandwidth = isOn;
+                          }),
+                    ),
+                  ],
+                ),
               TableRow(
                 children: [
                   Text("Enable debug logs"),
