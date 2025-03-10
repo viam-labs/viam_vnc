@@ -1,3 +1,3 @@
 # Viam VNC
 
-A new Flutter project.
+A VNC app to connect to Viam machines.

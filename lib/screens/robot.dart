@@ -141,7 +141,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     stdLog("Starting tunnel to machine...");
     stdLog(tunnelCmd!);
 
-    tunnelProc = await Process.start(viamCLI, args, runInShell: true);
+    tunnelProc = await Process.start(viamCLI, args, runInShell: false);
     setState(() {
       tunnelProc = tunnelProc;
     });
