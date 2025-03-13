@@ -6,7 +6,14 @@ endif
 
 .PHONY: build_macos
 build_macos:
-	$(MAKE) build_flutter
+	rm -rf ./releases/*
+	xcodebuild clean -workspace ./macos/Runner.xcworkspace -scheme Runner -configuration Release
+	xcodebuild archive -workspace ./macos/Runner.xcworkspace -scheme Runner -configuration Release -archivePath ./releases/Runner.xcarchive -destination "generic/platform=macOS"
+	xcodebuild -exportArchive -archivePath ./releases/Runner.xcarchive -exportOptionsPlist ./macos/ExportOptions.plist -exportPath ./releases
+	ditto -c -k --keepParent ./releases/Viam\ VNC.app ./releases/Viam\ VNC.zip
+	xcrun notarytool submit ./releases/Viam\ VNC.zip --keychain-profile "notarytool-password" --wait
+	xcrun stapler staple ./releases/Viam\ VNC.app
+	spctl --assess --type execute ./releases/Viam\ VNC.app
 
 .PHONY: build_windows
 build_windows:
