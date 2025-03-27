@@ -8,7 +8,6 @@
 #define MyAppExeName "viam_vnc.exe"
 
 [Setup]
-SignTool=MsSign $f
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{7A703454-136B-4C13-8DDB-399B13BA7068}
@@ -33,9 +32,9 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline
-OutputDir=C:\Users\admin\viam_vnc\releases
+OutputDir=releases
 OutputBaseFilename=viamvnc-windows-x64
-SetupIconFile=C:\Users\admin\viam_vnc\assets\img\icon.ico
+SetupIconFile=assets\img\icon.ico
 SolidCompression=yes
 WizardStyle=modern
 
@@ -46,20 +45,20 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\bonsoir_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\flutter_webrtc_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\libwebrtc.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\msvcp140.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\msvcp140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\msvcp140_2.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\screen_retriever_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\vcruntime140.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\vcruntime140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\window_manager_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\admin\viam_vnc\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\bonsoir_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\flutter_webrtc_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\libwebrtc.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows\lib\msvcp140.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows\lib\msvcp140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows\lib\msvcp140_2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\screen_retriever_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows\lib\vcruntime140.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "windows\lib\vcruntime140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\window_manager_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
