@@ -1,0 +1,82 @@
+name: Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - uses: 'actions/checkout@v4'
+
+      - id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          token_format: 'access_token'
+          project_id: 'engineering-tools-310515'
+          workload_identity_provider: 'projects/385154741571/locations/global/workloadIdentityPools/ev-signing-id/providers/github-repos-viam-and-labs'
+          service_account: 'ev-code-signing@engineering-tools-310515.iam.gserviceaccount.com'
+
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v2'
+        with:
+          secrets: |-
+            public_key:projects/385154741571/secrets/ev-code-signing-public-key
+
+      - run: |
+          echo '${{ steps.secrets.outputs.public_key }}' > cert.pem
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.24.1'
+
+      - name: Build Hosts Updater
+        run: |
+          make -C tools/hosts_updater build
+          mkdir -Force assets\exe
+          cp tools\hosts_updater\hosts_updater.exe -Destination assets\exe -Force
+          
+      - name: Sign Hosts Updater
+      
+        run: java -jar tools\jsign-7.1.jar --name "Viam VNC Hosts Updater"
+          --storetype GOOGLECLOUD
+          --keystore projects/engineering-tools-310515/locations/global/keyRings/release_signing_key
+          --storepass "${{ steps.auth.outputs.access_token }}"
+          --alias ev-code-signing-key/cryptoKeyVersions/1
+          --certfile cert.pem assets\exe\hosts_updater.exe
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Build Viam VNC
+        run: make build_flutter
+      
+      - name: Compile to Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: windows_setup.iss
+
+      - name: Sign Viam VNC
+        run: java -jar tools\jsign-7.1.jar
+          --storetype GOOGLECLOUD
+          --keystore projects/engineering-tools-310515/locations/global/keyRings/release_signing_key
+          --storepass "${{ steps.auth.outputs.access_token }}"
+          --alias ev-code-signing-key/cryptoKeyVersions/1
+          --certfile cert.pem releases\viamvnc-windows-x64.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viamvnc-windows-x64
+          path: releases\viamvnc-windows-x64.exe
+
