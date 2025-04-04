@@ -6,6 +6,7 @@ import 'package:viam_sdk/viam_sdk.dart';
 
 import '../helpers.dart';
 import 'list_orgs.dart';
+import 'settings.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -96,9 +97,28 @@ class _LoginState extends State<LoginScreen> {
     ).pushReplacement(MaterialPageRoute(builder: (_) => ListOrgsScreen(viam)));
   }
 
+  Future<void> showSettings(BuildContext context) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(children: [SettingsScreen(isLoggedIn: false)]);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              showSettings(context);
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
