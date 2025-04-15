@@ -1,7 +1,7 @@
 name: viam_vnc
 description: "A VNC viewer for Viam machines"
 publish_to: 'none'
-version: 0.1.2+1
+version: 0.1.2+3
 
 environment:
   sdk: ^3.7.0
