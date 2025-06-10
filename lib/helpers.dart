@@ -71,13 +71,23 @@ Future<void> _makeExecutable(File file) async {
 }
 
 Future<void> setupVNC() async {
+  final file = File((await getVNCPath())!);
+  if (await file.exists()) {
+    return;
+  }
   if (Platform.isWindows) {
-    final file = File((await getVNCPath())!);
-    if (await file.exists()) {
-      return;
-    }
     final asset = await rootBundle.load("assets/exe/vncviewer.exe");
     await file.writeAsBytes(Uint8List.sublistView(asset));
+  }
+  if (Platform.isMacOS) {
+    try {
+      final asset = await rootBundle.load("assets/macos/RustDesk.zip");
+      final zipFile = File(join(file.parent.path, 'RustDesk.zip'));
+      await zipFile.writeAsBytes(Uint8List.sublistView(asset));
+      await Process.run('unzip', ['-o', zipFile.path, '-d', file.parent.path]);
+    } catch (err) {
+      print(err);
+    }
   }
 }
 
@@ -85,6 +95,9 @@ Future<String?> getVNCPath() async {
   if (Platform.isWindows) {
     final dir = await getApplicationSupportDirectory();
     return join(dir.path, "vncviewer.exe");
+  } else if (Platform.isMacOS) {
+    final dir = await getApplicationSupportDirectory();
+    return join(dir.path, "RustDesk.app");
   }
   return null;
 }

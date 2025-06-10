@@ -3,11 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_rfb/flutter_rfb.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:path/path.dart';
 import 'package:viam_sdk/protos/app/app.dart';
 import 'package:viam_sdk/src/utils.dart';
-import 'package:viam_sdk/viam_sdk.dart';
+import 'package:viam_sdk/viam_sdk.dart' hide Switch;
 import 'package:window_manager/window_manager.dart';
 
 import '../helpers.dart';
@@ -34,6 +33,13 @@ class _Log {
 
 enum _State { init, connecting, connected, error }
 
+class _VncConfig {
+  final int port;
+  final String password;
+
+  const _VncConfig(this.port, this.password);
+}
+
 class _RobotState extends State<RobotScreen> with WindowListener {
   _State _state = _State.init;
 
@@ -49,7 +55,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
   Process? tunnelProc;
   Process? vncProc;
 
-  String _vncPassword = "";
+  _VncConfig? _vncConfig;
 
   Future<void> start() async {
     setState(() {
@@ -86,15 +92,15 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     }
 
     if (_debugMode) {
-      stdLog("DEBUG: Obtaining VNC password...");
+      stdLog("DEBUG: Obtaining VNC config...");
     }
     try {
-      final password = await getVNCPassword(robotConfig);
+      final config = await getVNCConfig(robotConfig);
       if (_debugMode) {
         stdLog("DEBUG: Done!");
       }
       setState(() {
-        _vncPassword = password;
+        _vncConfig = config;
       });
     } catch (err) {
       errLog(err.toString());
@@ -111,12 +117,16 @@ class _RobotState extends State<RobotScreen> with WindowListener {
 
     stdLog("Connected! Starting VNC viewer...");
 
-    if (_useExternalVNC) {
-      launchVNC();
-    }
+    launchVNC();
   }
 
   Future<void> startTunnel(String viamCLI, RobotPart mainPart) async {
+    if (_vncConfig == null) {
+      setState(() {
+        _state = _State.error;
+      });
+      return;
+    }
     setState(() {
       _state = _State.connecting;
     });
@@ -132,7 +142,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
       "--part",
       mainPart.id,
       "--destination-port",
-      "5900",
+      _vncConfig!.port.toString(),
       "--local-port",
       "5901",
     ]);
@@ -230,55 +240,39 @@ class _RobotState extends State<RobotScreen> with WindowListener {
   }
 
   Future<void> launchVNC() async {
-    final url = "vnc://:$_vncPassword@127.0.0.1:5901";
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else if (Platform.isWindows) {
-      final vncExe = await getVNCPath();
-      if (vncExe == null) {
-        return errLog("Could not load external Windows VNC viewer executable");
-      }
-      List<String> vncArgs = [
-        "-connect",
-        "127.0.0.1:5901",
-        "-password",
-        _vncPassword,
-        "-autoscaling",
-      ];
-      if (_lowBandwidth) {
-        vncArgs.addAll([
-          "-64colors",
-          "-encoding",
-          "tight",
-          "-compresslevel",
-          "9",
-          "-quality",
-          "6",
-        ]);
-      }
-      vncProc = await Process.start(vncExe, vncArgs);
-      vncProc!.stdout.transform(utf8.decoder).forEach((log) {
-        stdLog(log);
-        _logsController.animateTo(
-          _logsController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 100),
-          curve: Curves.decelerate,
-        );
-      });
-      vncProc!.stderr.transform(utf8.decoder).forEach((log) {
-        errLog(log);
-        _logsController.animateTo(
-          _logsController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 100),
-          curve: Curves.decelerate,
-        );
-      });
-    } else {
-      errLog("Could not launch external VNC viewer");
+    String? vncExe = await getVNCPath();
+    if (vncExe == null) {
+      return errLog("Could not load RustDesk executable");
     }
+    if (Platform.isMacOS) {
+      vncExe = join(vncExe, "Contents", "MacOS", "RustDesk");
+    }
+    List<String> vncArgs = [
+      "--connect",
+      "127.0.0.1:5901",
+      "--password",
+      _vncConfig!.password,
+    ];
+    vncProc = await Process.start(vncExe, vncArgs);
+    vncProc!.stdout.transform(utf8.decoder).forEach((log) {
+      stdLog(log);
+      _logsController.animateTo(
+        _logsController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 100),
+        curve: Curves.decelerate,
+      );
+    });
+    vncProc!.stderr.transform(utf8.decoder).forEach((log) {
+      errLog(log);
+      _logsController.animateTo(
+        _logsController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 100),
+        curve: Curves.decelerate,
+      );
+    });
   }
 
-  Future<String> getVNCPassword(Map<String, dynamic> config) async {
+  Future<_VncConfig> getVNCConfig(Map<String, dynamic> config) async {
     if (_debugMode) {
       stdLog(
         "DEBUG: Extracting list of components from machine's configuration...",
@@ -286,9 +280,9 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     }
     final components =
         config.putIfAbsent("components", () => []) as List<dynamic>;
-    String? password = _getVNCPasswordFromComponents(components);
-    if (password != null) {
-      return password;
+    _VncConfig? vncConfig = _getVncConfigFromComponents(components);
+    if (vncConfig != null) {
+      return vncConfig;
     }
 
     if (_debugMode) {
@@ -304,16 +298,18 @@ class _RobotState extends State<RobotScreen> with WindowListener {
         stdLog("DEBUG: Checking fragment $frag");
       }
       final components = await _getFragmentComponents(frag);
-      String? password = _getVNCPasswordFromComponents(components);
-      if (password != null) {
-        return password;
+      _VncConfig? vncConfig = _getVncConfigFromComponents(components);
+      if (vncConfig != null) {
+        return vncConfig;
       }
     }
 
     if (_debugMode) {
-      stdLog("DEBUG: No tight-vnc-server with password found in fragments");
+      stdLog(
+        "DEBUG: No rustdesk-server with required configuration found in fragments",
+      );
     }
-    throw Exception("No VNC component/password found");
+    throw Exception("No RustDesk component/configuration found");
   }
 
   Future<List<dynamic>> _getFragmentComponents(String id) async {
@@ -324,34 +320,36 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     return components;
   }
 
-  String? _getVNCPasswordFromComponents(List<dynamic> components) {
+  _VncConfig? _getVncConfigFromComponents(List<dynamic> components) {
     if (_debugMode) {
-      stdLog("DEBUG: Finding first tight-vnc-server component...");
+      stdLog("DEBUG: Finding first rustdesk-server component...");
     }
     final vncComponent = components.firstWhere(
-      (component) => component["model"] == "viam:tightvnc:server",
+      (component) =>
+          component["model"] == "viam:rustdesk-server:rustdesk-server",
       orElse: () => {},
     );
     if (vncComponent.isEmpty) {
       if (_debugMode) {
-        stdLog("DEBUG: No tight-vnc-server component found!");
+        stdLog("DEBUG: No rustdesk-server component found!");
       }
       return null;
     }
     if (_debugMode) {
       stdLog(
-        "DEBUG: Done! Found tight-vnc-server component! Getting component's attributes...",
+        "DEBUG: Done! Found rustdesk-server component! Getting component's attributes...",
       );
     }
     final attrs = vncComponent["attributes"];
     if (_debugMode) {
-      stdLog("DEBUG: Done! Getting password from attributes...");
+      stdLog("DEBUG: Done! Getting config from attributes...");
     }
+    final port = attrs["port"] as double;
     final password = attrs["password"] as String;
     if (_debugMode) {
-      stdLog("DEBUG: Done! Returning password...");
+      stdLog("DEBUG: Done! Returning config...");
     }
-    return password;
+    return _VncConfig(port.toInt(), password);
   }
 
   void stdLog(String log) {
@@ -519,25 +517,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
           ),
         ];
       case _State.connected:
-        if (!_useExternalVNC) {
-          body = [
-            Expanded(
-              child: InteractiveViewer(
-                constrained: true,
-                maxScale: 10,
-                child: RemoteFrameBufferWidget(
-                  connectingWidget: Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-                  hostName: "127.0.0.1",
-                  port: 5901,
-                  password: _vncPassword,
-                  onError: (error) => errLog("VNC Error: ${error.toString()}"),
-                ),
-              ),
-            ),
-          ];
-        }
+      // Do nothing
       case _State.error:
         body = [
           Expanded(

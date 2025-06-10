@@ -28,13 +28,10 @@ class _ListLocationsState extends State<ListLocationsScreen> {
 
   Future<void> _initState() async {
     final locations = await widget._viam.appClient.listLocations(widget.org.id);
-    locations.sort(
-      (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-    );
+    locations.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     setState(() {
       this.locations = locations;
-      parentLocations =
-          locations.where((loc) => loc.parentLocationId.isEmpty).toList();
+      parentLocations = locations.where((loc) => loc.parentLocationId.isEmpty).toList();
       _isLoading = false;
     });
     if (locations.length == 1) {
@@ -45,14 +42,7 @@ class _ListLocationsState extends State<ListLocationsScreen> {
   void _navigateToLocation(Location location) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (_) => LocationScreen(
-              widget._viam,
-              location,
-              locations
-                  .where((loc) => loc.parentLocationId == location.id)
-                  .toList(),
-            ),
+        builder: (_) => LocationScreen(widget._viam, location, locations.where((loc) => loc.parentLocationId == location.id).toList()),
       ),
     );
   }
@@ -60,14 +50,7 @@ class _ListLocationsState extends State<ListLocationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          children: [
-            const Text('Locations'),
-            Text(widget.org.name, style: TextStyle(fontSize: 12)),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: Column(children: [const Text('Locations'), Text(widget.org.name, style: TextStyle(fontSize: 12))])),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator.adaptive())
