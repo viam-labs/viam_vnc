@@ -55,6 +55,11 @@ jobs:
           --alias ev-code-signing-key/cryptoKeyVersions/1
           --certfile cert.pem assets\exe\hosts_updater.exe
 
+      - name: Download RustDesk
+        shell: bash
+        run: |
+          curl -L -o assets/exe/rustdesk.exe ${{ env.VNC_VIEWER_DOWNLOAD_URL }}
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
