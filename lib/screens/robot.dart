@@ -44,7 +44,6 @@ class _RobotState extends State<RobotScreen> with WindowListener {
   _State _state = _State.init;
 
   bool _useExternalVNC = true;
-  bool _lowBandwidth = false;
   bool _debugMode = false;
 
   final List<_Log> logs = [];
@@ -433,37 +432,9 @@ class _RobotState extends State<RobotScreen> with WindowListener {
                       ),
                     ],
                   ),
-                  Switch.adaptive(
-                    value: _useExternalVNC,
-                    onChanged:
-                        (isOn) => setState(() {
-                          _useExternalVNC = isOn;
-                        }),
-                  ),
+                  Switch.adaptive(value: _useExternalVNC, onChanged: null),
                 ],
               ),
-              if (Platform.isWindows)
-                TableRow(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Low-Bandwidth Settings"),
-                        Text(
-                          "This option will improve responsiveness at the cost of quality and resolution.",
-                          style: TextStyle(fontSize: 10),
-                        ),
-                      ],
-                    ),
-                    Switch.adaptive(
-                      value: _lowBandwidth,
-                      onChanged:
-                          (isOn) => setState(() {
-                            _lowBandwidth = isOn;
-                          }),
-                    ),
-                  ],
-                ),
               TableRow(
                 children: [
                   Text("Enable debug logs"),
@@ -517,7 +488,13 @@ class _RobotState extends State<RobotScreen> with WindowListener {
           ),
         ];
       case _State.connected:
-      // Do nothing
+        body = [
+          Expanded(
+            child: Center(
+              child: Text("Connected!", textAlign: TextAlign.center),
+            ),
+          ),
+        ];
       case _State.error:
         body = [
           Expanded(
