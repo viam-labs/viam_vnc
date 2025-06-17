@@ -2,8 +2,6 @@ PLATFORM := macos
 ifeq ($(OS),Windows_NT)
     IS_WINDOWS := $(USERPROFILE)
 	PLATFORM := windows
-	SHELL := pwsh
-	.SHELLFLAGS := -Command
 endif
 
 .PHONY: build_macos
