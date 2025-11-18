@@ -57,9 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void navigateToLogin() {
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
   }
 
   @override
@@ -74,16 +72,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           icon: const Icon(Icons.update),
         ),
         if (widget.isLoggedIn)
-          TextButton.icon(
-            onPressed: _isLoggingOut ? null : logout,
-            label: Text("Logout"),
-            icon: const Icon(Icons.logout),
-          ),
-        if (_logoutError.isNotEmpty)
-          Text(
-            _logoutError,
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
+          TextButton.icon(onPressed: _isLoggingOut ? null : logout, label: Text("Logout"), icon: const Icon(Icons.logout)),
+        if (_logoutError.isNotEmpty) Text(_logoutError, style: TextStyle(color: Theme.of(context).colorScheme.error)),
         const Divider(),
         Text("Version $_version"),
       ],

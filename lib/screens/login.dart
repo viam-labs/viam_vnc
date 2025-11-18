@@ -92,9 +92,7 @@ class _LoginState extends State<LoginScreen> {
     final process = Process.runSync(viamCLI, ["login", "print-access-token"]);
     final accessToken = process.stdout.toString();
     final viam = Viam.withAccessToken(accessToken);
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => ListOrgsScreen(viam)));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ListOrgsScreen(viam)));
   }
 
   Future<void> showSettings(BuildContext context) async {
@@ -127,16 +125,8 @@ class _LoginState extends State<LoginScreen> {
                   ? [CircularProgressIndicator.adaptive(), Text(loadingText)]
                   : [
                     Text(loginText.replaceAll("Info: ", "")),
-                    Text(
-                      errorText,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _isLoggingIn ? null : onPressed,
-                      child: Text("Login"),
-                    ),
+                    Text(errorText, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    TextButton(onPressed: _isLoggingIn ? null : onPressed, child: Text("Login")),
                   ],
         ),
       ),

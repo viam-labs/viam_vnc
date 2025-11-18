@@ -38,9 +38,7 @@ class _ListOrgsState extends State<ListOrgsScreen> {
   }
 
   void _navigateToOrg(Organization org) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ListLocationsScreen(widget._viam, org)),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => ListLocationsScreen(widget._viam, org)));
   }
 
   Future<void> showSettings(BuildContext context) async {
@@ -77,11 +75,7 @@ class _ListOrgsState extends State<ListOrgsScreen> {
                 itemCount: organizations.length,
                 itemBuilder: (_, index) {
                   final org = organizations[index];
-                  return ListTile(
-                    title: Text(org.name),
-                    onTap: () => _navigateToOrg(org),
-                    trailing: const Icon(Icons.chevron_right),
-                  );
+                  return ListTile(title: Text(org.name), onTap: () => _navigateToOrg(org), trailing: const Icon(Icons.chevron_right));
                 },
               ),
           if (_showSettings)
@@ -92,13 +86,7 @@ class _ListOrgsState extends State<ListOrgsScreen> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(20),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: Colors.black.withAlpha(20), blurRadius: 8, offset: const Offset(0, 4))],
                 ),
                 child: SettingsScreen(),
               ),

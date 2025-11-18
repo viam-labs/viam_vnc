@@ -16,9 +16,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: MaterialTheme(TextTheme.of(context)).light(),
-      home: Scaffold(body: Center(child: LoginScreen())),
-    );
+    return MaterialApp(theme: MaterialTheme(TextTheme.of(context)).light(), home: Scaffold(body: Center(child: LoginScreen())));
   }
 }
