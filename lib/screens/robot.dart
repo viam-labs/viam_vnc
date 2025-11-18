@@ -292,11 +292,12 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     final fragments =
         config.putIfAbsent("fragments", () => []) as List<dynamic>;
     for (final fragment in fragments) {
-      final frag = fragment as String;
+      final frag = fragment as Map<String, dynamic>;
+      final fragId = frag['id'] as String;
       if (_debugMode) {
-        stdLog("DEBUG: Checking fragment $frag");
+        stdLog("DEBUG: Checking fragment with ID $fragId");
       }
-      final components = await _getFragmentComponents(frag);
+      final components = await _getFragmentComponents(fragId);
       _VncConfig? vncConfig = _getVncConfigFromComponents(components);
       if (vncConfig != null) {
         return vncConfig;
