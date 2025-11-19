@@ -97,6 +97,12 @@ Future<String?> getVNCPath() async {
     return join(dir.path, "rustdesk.exe");
   } else if (Platform.isMacOS) {
     return join(dir.path, "RustDesk.app");
+  } else if (Platform.isLinux) {
+    File rustdeskbinary = File("/usr/bin/rustdesk");
+    if (await rustdeskbinary.exists()) {
+      // assumes RustDesk has been installed via native Linux installer
+      return "/usr/bin/rustdesk";
+    }
   }
   return null;
 }
