@@ -98,6 +98,8 @@ Future<String?> getVNCPath() async {
   } else if (Platform.isMacOS) {
     final dir = await getApplicationSupportDirectory();
     return join(dir.path, "RustDesk.app");
+  } else if (Platform.isLinux) {
+    return "/usr/bin/rustdesk";
   }
   return null;
 }
