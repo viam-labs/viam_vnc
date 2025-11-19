@@ -92,11 +92,10 @@ Future<void> setupVNC() async {
 }
 
 Future<String?> getVNCPath() async {
+  final dir = await getApplicationSupportDirectory();
   if (Platform.isWindows) {
-    final dir = await getApplicationSupportDirectory();
     return join(dir.path, "rustdesk.exe");
   } else if (Platform.isMacOS) {
-    final dir = await getApplicationSupportDirectory();
     return join(dir.path, "RustDesk.app");
   }
   return null;
