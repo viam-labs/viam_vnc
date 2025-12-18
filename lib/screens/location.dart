@@ -38,13 +38,21 @@ class _LocationState extends State<LocationScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder:
-            (_) => LocationScreen(widget._viam, location, widget.locations.where((loc) => loc.parentLocationId == location.id).toList()),
+            (_) => LocationScreen(
+              widget._viam,
+              location,
+              widget.locations
+                  .where((loc) => loc.parentLocationId == location.id)
+                  .toList(),
+            ),
       ),
     );
   }
 
   void _navigateToRobot(Robot robot) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => RobotScreen(widget._viam, robot)));
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => RobotScreen(widget._viam, robot)));
   }
 
   @override
@@ -70,7 +78,6 @@ class _LocationState extends State<LocationScreen> {
                     return ListTile(
                       title: Text(robot.name),
                       onTap: () => _navigateToRobot(robot),
-                      trailing: const Icon(Icons.chevron_right),
                     );
                   }
                 },

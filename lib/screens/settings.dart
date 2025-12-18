@@ -71,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text('Settings', style: Theme.of(context).textTheme.headlineSmall),
         TextButton.icon(
           onPressed: _cliUpdating ? null : updateCLI,
-          label: Text(_cliUpdating ? "Updateing..." : "Update CLI"),
+          label: Text(_cliUpdating ? "Updating..." : "Update CLI"),
           icon: const Icon(Icons.update),
         ),
         if (widget.isLoggedIn)

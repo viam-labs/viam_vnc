@@ -297,11 +297,8 @@ class _RobotState extends State<RobotScreen> with WindowListener {
       if (_debugMode) {
         stdLog("DEBUG: Checking fragment with ID $fragId");
       }
-      final components = await _getFragmentComponents(fragId);
-      _VncConfig? vncConfig = _getVncConfigFromComponents(components);
-      if (vncConfig != null) {
-        return vncConfig;
-      }
+      final fragConfig = await _getFragmentConfig(fragId);
+      return getVNCConfig(fragConfig);
     }
 
     if (_debugMode) {
@@ -312,12 +309,10 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     throw Exception("No RustDesk component/configuration found");
   }
 
-  Future<List<dynamic>> _getFragmentComponents(String id) async {
+  Future<Map<String, dynamic>> _getFragmentConfig(String id) async {
     final fragment = await widget._viam.appClient.getFragment(id);
     final configStruct = fragment.fragment;
-    final config = StructUtils(configStruct).toMap();
-    final components = config["components"] as List<dynamic>;
-    return components;
+    return StructUtils(configStruct).toMap();
   }
 
   _VncConfig? _getVncConfigFromComponents(List<dynamic> components) {
