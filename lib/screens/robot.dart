@@ -273,9 +273,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
 
   Future<_VncConfig> getVNCConfig(Map<String, dynamic> config) async {
     if (_debugMode) {
-      stdLog(
-        "DEBUG: Extracting list of components from machine's configuration...",
-      );
+      stdLog("DEBUG: Extracting list of components from configuration...");
     }
     final components =
         config.putIfAbsent("components", () => []) as List<dynamic>;
@@ -284,13 +282,13 @@ class _RobotState extends State<RobotScreen> with WindowListener {
       return vncConfig;
     }
 
-    if (_debugMode) {
-      stdLog(
-        "DEBUG: No tight-vnc-server found on the main part. Checking fragments...",
-      );
-    }
     final fragments =
         config.putIfAbsent("fragments", () => []) as List<dynamic>;
+    if (fragments.isNotEmpty && _debugMode) {
+      stdLog(
+        "DEBUG: No rustdesk-server found in components. Checking fragments...",
+      );
+    }
     for (final fragment in fragments) {
       final frag = fragment as Map<String, dynamic>;
       final fragId = frag['id'] as String;
@@ -298,14 +296,13 @@ class _RobotState extends State<RobotScreen> with WindowListener {
         stdLog("DEBUG: Checking fragment with ID $fragId");
       }
       final fragConfig = await _getFragmentConfig(fragId);
-      return getVNCConfig(fragConfig);
+      try {
+        return await getVNCConfig(fragConfig);
+      } catch (_) {
+        continue;
+      }
     }
 
-    if (_debugMode) {
-      stdLog(
-        "DEBUG: No rustdesk-server with required configuration found in fragments",
-      );
-    }
     throw Exception("No RustDesk component/configuration found");
   }
 

@@ -28,6 +28,7 @@ endif
 .PHONY: local_release_macos
 local_release_macos:
 	@echo "This target must be run from a local macOS machine with the appropriate programs and crendentials"
+	$(MAKE) build_macos
 	rm -rf ./releases/*
 	xcodebuild clean -workspace ./macos/Runner.xcworkspace -scheme Runner -configuration Release
 	xcodebuild archive -workspace ./macos/Runner.xcworkspace -scheme Runner -configuration Release -archivePath ./releases/Runner.xcarchive -destination "generic/platform=macOS"
