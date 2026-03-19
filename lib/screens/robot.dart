@@ -252,7 +252,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     if (Platform.isMacOS) {
       vncExe = join(vncExe, "Contents", "MacOS", "RustDesk");
     }
-    List<String> vncArgs = ["--connect", "127.0.0.1:5901", "--password"];
+    List<String> vncArgs = ["--connect", "127.0.0.1:5901"];
     if (_vncConfig!.promptForAccess == true) {
       vncArgs.addAll(['--option', 'approve-mode', 'click']);
     } else if (_vncConfig!.password.isNotNullNorEmpty) {
