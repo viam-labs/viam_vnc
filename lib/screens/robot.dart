@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:viam_sdk/protos/app/app.dart';
-import 'package:viam_sdk/src/utils.dart';
+import 'package:viam_sdk/src/utils.dart'; // ignore: implementation_imports
 import 'package:viam_sdk/viam_sdk.dart' hide Switch;
 import 'package:window_manager/window_manager.dart';
 
@@ -35,9 +35,10 @@ enum _State { init, connecting, connected, error }
 
 class _VncConfig {
   final int port;
-  final String password;
+  final String? password;
+  final bool? promptForAccess;
 
-  const _VncConfig(this.port, this.password);
+  const _VncConfig(this.port, this.password, this.promptForAccess);
 }
 
 class _RobotState extends State<RobotScreen> with WindowListener {
@@ -95,6 +96,11 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     }
     try {
       final config = await getVNCConfig(robotConfig);
+      if (config.password.isNullOrEmpty && config.promptForAccess == null) {
+        throw Exception(
+          "VNC config must have one of password or prompt4access",
+        );
+      }
       if (_debugMode) {
         stdLog("DEBUG: Done!");
       }
@@ -246,12 +252,16 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     if (Platform.isMacOS) {
       vncExe = join(vncExe, "Contents", "MacOS", "RustDesk");
     }
-    List<String> vncArgs = [
-      "--connect",
-      "127.0.0.1:5901",
-      "--password",
-      _vncConfig!.password,
-    ];
+    List<String> vncArgs = ["--connect", "127.0.0.1:5901"];
+    if (_vncConfig!.promptForAccess == true) {
+      vncArgs.addAll(['--option', 'approve-mode', 'click']);
+    } else if (_vncConfig!.password.isNotNullNorEmpty) {
+      vncArgs.addAll(['--password', _vncConfig!.password!]);
+    } else {
+      return errLog(
+        "Reached a state without a password or prompt4access. Please reach out to support.",
+      );
+    }
     vncProc = await Process.start(vncExe, vncArgs);
     vncProc!.stdout.transform(utf8.decoder).forEach((log) {
       stdLog(log);
@@ -303,7 +313,7 @@ class _RobotState extends State<RobotScreen> with WindowListener {
       }
     }
 
-    throw Exception("No RustDesk component/configuration found");
+    throw Exception("No valid RustDesk component/configuration found");
   }
 
   Future<Map<String, dynamic>> _getFragmentConfig(String id) async {
@@ -337,11 +347,12 @@ class _RobotState extends State<RobotScreen> with WindowListener {
       stdLog("DEBUG: Done! Getting config from attributes...");
     }
     final port = attrs["port"] as double;
-    final password = attrs["password"] as String;
+    final password = attrs["password"] as String?;
+    final promptForAccess = attrs["prompt4access"] as bool?;
     if (_debugMode) {
       stdLog("DEBUG: Done! Returning config...");
     }
-    return _VncConfig(port.toInt(), password);
+    return _VncConfig(port.toInt(), password, promptForAccess);
   }
 
   void stdLog(String log) {
