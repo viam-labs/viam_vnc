@@ -126,3 +126,20 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
   install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
     COMPONENT Runtime)
 endif()
+
+# Install the application icon so the window manager can display it
+# (used at runtime by GTK via gtk_window_set_icon_from_file).
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/app_icon.png"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
+
+# Install the icon into the hicolor theme so the .desktop file's
+# Icon= field resolves correctly on the GNOME desktop.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/app_icon.png"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/icons/hicolor/256x256/apps"
+  RENAME "com.viam.viam_vnc.png"
+  COMPONENT Runtime)
+
+# Install the .desktop file for GNOME desktop integration.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/com.viam.viam_vnc.desktop"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+  COMPONENT Runtime)
