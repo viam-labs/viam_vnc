@@ -44,7 +44,7 @@ class _VncConfig {
 class _RobotState extends State<RobotScreen> with WindowListener {
   _State _state = _State.init;
 
-  bool _useExternalVNC = true;
+  final bool _useExternalVNC = true;
   bool _debugMode = false;
 
   final List<_Log> logs = [];
@@ -135,7 +135,16 @@ class _RobotState extends State<RobotScreen> with WindowListener {
     setState(() {
       _state = _State.connecting;
     });
+
+    // Kill existing tunnels
     tunnelProc?.kill();
+    try {
+      _killExistingTunnel();
+    } catch (e) {
+      if (_debugMode) {
+        errLog("Error killing potentially existing tunnel process: $e");
+      }
+    }
 
     bool needsHostUpdate = false;
 
@@ -199,6 +208,52 @@ class _RobotState extends State<RobotScreen> with WindowListener {
         }
       }
       await Future.delayed(Duration(milliseconds: 100));
+    }
+  }
+
+  Future<void> _killExistingTunnel() async {
+    if (Platform.isWindows) {
+      final netstat = await Process.run('netstat', ['-ano'], runInShell: true);
+      final pids = <String>{};
+      for (final line in netstat.stdout.toString().split('\n')) {
+        if (line.contains(':5901 ') || line.contains(':5901\t')) {
+          final parts = line.trim().split(RegExp(r'\s+'));
+          if (parts.isNotEmpty) pids.add(parts.last.trim());
+        }
+      }
+      for (final pid in pids) {
+        final tasklist = await Process.run('tasklist', [
+          '/fi',
+          'PID eq $pid',
+          '/fo',
+          'csv',
+          '/nh',
+        ], runInShell: true);
+        if (tasklist.stdout.toString().toLowerCase().contains('viam-cli')) {
+          await Process.run('taskkill', ['/F', '/PID', pid], runInShell: true);
+        }
+      }
+    } else {
+      // macOS and Linux: lsof -F pc outputs 'p<pid>' and 'c<command>' lines
+      final lsof = await Process.run('lsof', [
+        '-i',
+        ':5901',
+        '-n',
+        '-P',
+        '-F',
+        'pc',
+      ]);
+      String? currentPid;
+      for (final line in lsof.stdout.toString().split('\n')) {
+        if (line.startsWith('p')) {
+          currentPid = line.substring(1).trim();
+        } else if (line.startsWith('c') && currentPid != null) {
+          if (line.substring(1).trim() == 'viam-cli') {
+            await Process.run('kill', [currentPid]);
+          }
+          currentPid = null;
+        }
+      }
     }
   }
 
