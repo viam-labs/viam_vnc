@@ -1,5 +1,5 @@
 Package: viam-vnc
-Version: 0.1.5-6
+Version: 0.1.6-0
 Architecture: amd64
 Maintainer: Viam <support@viam.com>
 Installed-Size: 65536
