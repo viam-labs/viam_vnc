@@ -91,6 +91,8 @@ _linux_stage: build_linux
 package_deb: _linux_stage
 	# Copy DEBIAN control directory into the stage tree
 	cp -r linux/packaging/debian/DEBIAN $(DEB_STAGE)/DEBIAN
+	# Stamp the version from the Makefile into the staged control file
+	sed -i "s/^Version:.*/Version: $(VERSION)-$(RELEASE)/" $(DEB_STAGE)/DEBIAN/control
 	# Fix permissions required by dpkg-deb
 	chmod 0755 $(DEB_STAGE)/DEBIAN/postinst $(DEB_STAGE)/DEBIAN/postrm
 	mkdir -p releases
@@ -107,6 +109,8 @@ package_rpm: _linux_stage
 	rpmbuild -bb \
 	    --define "_topdir $(CURDIR)/$(RPM_ROOT)" \
 	    --define "_bundle_dir $(CURDIR)/$(BUNDLE_DIR)" \
+	    --define "pkg_version $(VERSION)" \
+	    --define "pkg_release $(RELEASE)" \
 	    $(RPM_ROOT)/SPECS/viam_vnc.spec
 	mkdir -p releases
 	find $(RPM_ROOT)/RPMS -name "*.rpm" -exec cp {} releases/ \;

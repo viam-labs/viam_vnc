@@ -1,6 +1,6 @@
 Name:           viam_vnc
-Version:        0.1.6
-Release:        0%{?dist}
+Version:        %{pkg_version}
+Release:        %{pkg_release}%{?dist}
 Summary:        VNC viewer for Viam machines
 License:        Proprietary
 URL:            https://www.viam.com
