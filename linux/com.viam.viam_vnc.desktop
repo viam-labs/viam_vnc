@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Viam VNC
+GenericName=VNC Viewer
+Comment=VNC viewer for Viam machines
+Exec=viam_vnc
+Icon=com.viam.viam_vnc
+Type=Application
+Categories=Network;RemoteAccess;
+Keywords=VNC;remote;viam;robot;
+StartupNotify=true
+StartupWMClass=viam_vnc

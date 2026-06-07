@@ -29,8 +29,8 @@ flutter:
   assets:
     - assets/exe/
     - assets/macos/
-
-flutter_launcher_icons:
+    - assets/img/
+  flutter_launcher_icons:
   windows:
     generate: true
     image_path: "assets/img/icon.png"
@@ -38,3 +38,6 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/img/icon.png"
+  # Linux is not supported by flutter_launcher_icons.
+  # The icon is installed via linux/CMakeLists.txt and set in
+  # linux/runner/my_application.cc using GTK directly.

@@ -1,0 +1,12 @@
+Package: viam-vnc
+Version: 0.1.6-0
+Architecture: amd64
+Maintainer: Viam <support@viam.com>
+Installed-Size: 65536
+Depends: libgtk-3-0, libglib2.0-0, libgdk-pixbuf-2.0-0, xdg-utils
+Section: net
+Priority: optional
+Homepage: https://www.viam.com
+Description: VNC viewer for Viam machines
+ Viam VNC is a desktop VNC viewer that connects to machines managed
+ by the Viam robotics platform.

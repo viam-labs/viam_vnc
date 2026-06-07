@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+# Register the application icon with the hicolor theme cache.
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+fi
+
+# Register the .desktop entry so it appears in GNOME Shell / application menu.
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database /usr/share/applications
+fi
