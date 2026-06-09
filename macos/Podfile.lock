@@ -50,7 +50,7 @@ SPEC CHECKSUMS:
   flutter_webrtc: 377dbcebdde6fed0fc40de87bcaaa2bffcec9a88
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
-  screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
+  screen_retriever_macos: c5508cc3c66ff0d4db650480cf0ab691e220d933
   url_launcher_macos: f87a979182d112f911de6820aefddaf56ee9fbfd
   WebRTC-SDK: 79942c006ea64f6fb48d7da8a4786dfc820bc1db
   window_manager: b729e31d38fb04905235df9ea896128991cad99e
